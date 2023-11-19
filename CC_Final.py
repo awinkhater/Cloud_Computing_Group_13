@@ -73,3 +73,64 @@ average_values = df.loc[[start_datetime, end_datetime], selected_columns].mean()
 df.loc[(df.index > start_datetime) & (df.index < end_datetime), selected_columns] = average_values.values
 
 #Created the final clean dataframe: df
+
+#ADDING SOME PLOTS:
+def ACF_stem(data, lags, title):
+    LD=ACF_prep(data,lags)
+    plt.figure()
+    (markers, stemlines, baseline) = plt.stem(LD.index,LD['AC Value'], markerfmt='o')
+    plt.setp(markers, color='red')
+    m = 1.96 / (np.sqrt(len(data)))
+    plt.title(title)
+    plt.xlabel("# of Lags")
+    plt.ylabel('AutoCorrelation value')
+    plt.axhspan(-m, m, alpha=0.2, color='blue')
+    plt.show()
+# ACF_stem(df['Hmax'],96,"Waves ACF Plot")
+
+# #ACF looks like slight Daily Seasonality
+# ################################%Correlation Matrix
+# sns.set_style('darkgrid')
+# sns.heatmap(data=df.corr(), annot=True)
+# plt.title('Waves Correlation Matrix')
+# plt.show()
+# # ##############################Rolling Variance and Mean
+def RMVplot(df, col):
+    log=[]
+    rv=[]
+    rm=[]
+    for i in df[col]:
+        log.append(i)
+        rv.append(np.var(log))
+        rm.append(np.mean(log))
+    plt.figure()
+    plt.subplot(2,1,1)
+    plt.plot(rm, label=f'{col} Rolling Mean')
+    plt.xlabel('Time ->')
+    plt.ylabel('Value')
+    plt.legend()
+    plt.xticks([])
+    plt.title(f'Rolling Mean of {col}')
+    plt.grid(True)
+    plt.subplot(2,1,2)
+    plt.plot(rv, label=f'{col} Rolling Variance')
+    plt.xlabel('Time ->')
+    plt.ylabel('Value')
+    plt.legend()
+    plt.xticks([])
+    plt.title(f'Rolling Variance of {col}')
+    plt.tight_layout()
+    plt.grid(True)
+    plt.show()
+RMVplot(df,'Hmax')
+#Stationarity Test
+from statsmodels.tsa.stattools import adfuller
+def ADF_Cal(x):
+    result = adfuller(x)
+    print("ADF Statistic: %f" %result[0])
+    print('p-value: %f' % result[1])
+    print('Critical Values:')
+    for key, value in result[4].items():
+        print('\t%s: %.3f' % (key, value))
+
+print(ADF_Cal(df['Hmax']))
