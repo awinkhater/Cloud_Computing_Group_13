@@ -75,6 +75,32 @@ df.loc[(df.index > start_datetime) & (df.index < end_datetime), selected_columns
 #Created the final clean dataframe: df
 
 #ADDING SOME PLOTS:
+def ACF_prep (data,lags):
+    mu=0
+    for m in data:
+        mu+=m
+    mu=(mu/len(data))
+    denom=0
+    numerator=0
+    List=[]
+    Nlist=[]
+    for d in data:
+        denom+= (d-mu)**2
+    for l in range (0, lags+1):
+        numerator=0
+        for i in range (len(data)):
+            if i+l < len(data):
+                numerator+=(data[i+l]-mu)*(data[i]-mu)
+
+        ac= numerator/denom
+        List.append(ac)
+        Nlist.append(ac)
+    Nlist.reverse()
+    Nlist= Nlist+List[1:]
+    LAGLIST = list(range(-lags, lags + 1))
+    LD=pd.DataFrame(Nlist, index=LAGLIST)
+    LD.columns=['AC Value']
+    return(LD)
 def ACF_stem(data, lags, title):
     LD=ACF_prep(data,lags)
     plt.figure()
@@ -86,7 +112,7 @@ def ACF_stem(data, lags, title):
     plt.ylabel('AutoCorrelation value')
     plt.axhspan(-m, m, alpha=0.2, color='blue')
     plt.show()
-# ACF_stem(df['Hmax'],96,"Waves ACF Plot")
+ACF_stem(df['Hmax'],96,"Waves ACF Plot")
 
 # #ACF looks like slight Daily Seasonality
 # ################################%Correlation Matrix
@@ -122,7 +148,7 @@ def RMVplot(df, col):
     plt.tight_layout()
     plt.grid(True)
     plt.show()
-RMVplot(df,'Hmax')
+# RMVplot(df,'Hmax')
 #Stationarity Test
 from statsmodels.tsa.stattools import adfuller
 def ADF_Cal(x):
