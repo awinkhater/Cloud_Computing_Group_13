@@ -1,10 +1,57 @@
 <html xmlns="http://www.w3.org/1999/xhtml" >
 <head>
     <title>Waves Measuring Buoys Data</title>
+    <style>
+      h1{text-align: center;}
+      table{margin: 0 auto;}
+    </style>
 </head>
 <body>
-  <h1>1 EDA</h1>
-  <h2>1.1 Correlation</h2>
+  <h1>Waves Measuring Buoys Data</h1>
+
+  <h2>1 Dataset</h2>
+    <ul>
+      <li>This is measured and derived wave data from data collected by oceanographic wave measuring buoys anchored at Mooloolaba.</li>
+      <li>This data comes from Queensland Government Data - https://data.qld.gov.au/dataset.</li>
+    </ul>
+    <table border="1" style="border-collapse: collapse">
+      <caption>Table 1: Features</caption>
+      <tr>
+        <th>Feature</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td>Date/Time</td>
+        <td>Date</td>
+      </tr>
+      <tr>
+        <td>Hs</td>
+        <td>Significant wave height, an average of the highest third of the waves in a record</td>
+      </tr>
+      <tr>
+        <td>Hmax</td>
+        <td>The maximum wave height in the record</td>
+      </tr>
+      <tr>
+        <td>Tz</td>
+        <td>The zero upcrossing wave period</td>
+      </tr>
+      <tr>
+        <td>Tp</td>
+        <td>The peak energy wave period</td>
+      </tr>
+      <tr>
+        <td>Peak Direction </td>
+        <td>Direction (related to true north) from which the peak period waves are coming from</td>
+      </tr>
+      <tr>
+        <td>SST</td>
+        <td>Approximation of sea surface temperature</td>
+      </tr>
+    </table>
+
+  <h2>2 EDA</h2>
+  <h3>2.1 Correlation</h3>
   <ul>
     <li>The correlation between the significant wave height and the sea surface temperature is week.</li>
     <li>The peak period waves are tend to come from the east, which is a natural outcome as the western side of the observation points is land.</li>
