@@ -226,6 +226,8 @@ def RMVplot(df, col):
     plt.show()
     plt.savefig("plot8.png")
 
+RMVplot(df,'Hmax')
+
 
 #Plot 9 - 12
 
