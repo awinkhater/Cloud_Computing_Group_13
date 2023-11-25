@@ -191,8 +191,9 @@ def ACF_stem(data, lags, title):
     plt.xlabel("# of Lags")
     plt.ylabel('AutoCorrelation value')
     plt.axhspan(-m, m, alpha=0.2, color='blue')
-    plt.show()
     plt.savefig("plot7.png")
+    plt.show()
+    
 
 ACF_stem(df['Hmax'],96,"Waves ACF Plot")
 
@@ -223,8 +224,8 @@ def RMVplot(df, col):
     plt.title(f'Rolling Variance of {col}')
     plt.tight_layout()
     plt.grid(True)
-    plt.show()
     plt.savefig("plot8.png")
+    plt.show()
 
 RMVplot(df,'Hmax')
 
@@ -248,8 +249,8 @@ plt.xlabel("Temperature (°C)")
 plt.ylabel("Wave Height (m)")
 plt.title(f"Significant Wave Height vs. Sea Surface Temperature. Correlation: {pearson_corr(df.Hs, df.SST):.2f}")
 #plt.savefig("WH_SST.png", format="png", dpi=300)
-plt.show()
 plt.savefig("plot9.png")
+plt.show()
 
 
 #Plot 10
@@ -261,8 +262,8 @@ ax.set_rgrids([1, 2, 3, 4, 5, 6, 7], angle=0)
 ax.scatter(df["Peak Direction"]*(np.pi / 180), df.Hmax,  s=5)
 plt.title(f"Maximum Wave Height vs. Direction")
 #plt.savefig("WH_D.png", format="png", dpi=300)
-plt.show()
 plt.savefig("plot10.png")
+plt.show()
 
 
 #Plot 11
@@ -272,8 +273,8 @@ plt.xlim(df.Tp.min()-1, df.Tp.max()+1)
 plt.ylabel("Wave Height (m)")
 plt.title(f"Maximum Wave Height vs. Peak Energy Wave Period. Correlation: {pearson_corr(df.Hmax, df.Tp):.2f}")
 #plt.savefig("WH_Tp.png", format="png", dpi=300)
-plt.show()
 plt.savefig("plot11.png")
+plt.show()
 
 
 #Plot 12
@@ -283,6 +284,6 @@ plt.xlim(df.Tp.min()-1, df.Tp.max()+1)
 plt.ylabel("Wave Height (m)")
 plt.title(f"Maximum Wave Height vs. Zero Upcrossing Wave Period. Correlation: {pearson_corr(df.Hmax, df.Tz):.2f}")
 #plt.savefig("WH_Tz.png", format="png", dpi=300)
-plt.show()
 plt.savefig("plot12.png")
+plt.show()
 
