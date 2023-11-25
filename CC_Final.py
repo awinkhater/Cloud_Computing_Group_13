@@ -160,3 +160,178 @@ def ADF_Cal(x):
         print('\t%s: %.3f' % (key, value))
 
 print(ADF_Cal(df['Hmax']))
+
+# Temp=df['Hmax']
+# Temp=pd.Series(np.array(Temp),
+#                index=pd.date_range('2017-01-01',
+#                                    periods=len(Temp),freq='d'))
+# # #Mean looks constant, and the varaince shows no visible trends or seasonality
+# from statsmodels.tsa.seasonal import STL, seasonal_decompose
+# stl = STL(Temp)
+# res = stl.fit()
+#
+# plt.figure(figsize=(8,6))
+# fig=res.plot()
+# plt.tight_layout()
+# plt.show()
+# #6
+# T=res.trend
+# S=res.seasonal
+# R=res.resid
+#
+# SAdj=Temp-S
+#
+# plt.figure()
+# plt.plot(Temp.index, Temp.values, label="Original Data")
+# plt.plot(Temp.index, SAdj, label="Seasonally Adjusted")
+# plt.legend()
+# plt.xlabel('Date')
+# plt.ylabel('Wave Height')
+# plt.title('Seasonally Adjusted Wave Data')
+# plt.xticks([])
+# plt.tight_layout()
+# plt.show()
+#
+# # #7
+# NT=np.var(R)
+# DT=np.var(T+R)
+# Trend=np.max([0,(1-(NT/DT))])
+# print(f"The strength of Trend for this dataset is: {Trend}")
+#
+# #8
+# NS=np.var(R)
+# DS=np.var(S+R)
+# Seas=np.max([0,(1-(NS/DS))])
+# print(f"The strength of Seasonality for this dataset is: {Seas}")
+
+##====================================================Train Test Split
+y=df['Hmax']
+Features=df.copy()
+Features.drop(['Hmax'], axis=1, inplace=True)
+
+X_train, X_test, y_train, y_test = train_test_split(
+  Features,y , random_state=104,test_size=0.20, shuffle=False)
+
+print(f"Training Set length: {len(X_train)}")
+print(f"Training Set length: {len(X_test)}")
+
+#=========================== HOlT WINTERS
+# #Simple forecasting methods (SES,drift)
+model = ExponentialSmoothing(y_train, trend='add', seasonal='add', seasonal_periods=48)
+model_fit = model.fit()
+
+# Make predictions on the test set
+predictions = model_fit.forecast(len(X_test))
+Pm=np.mean(predictions)
+for i in range(len(predictions)):
+    predictions[i]= (predictions[i]+Pm)/2
+# #===================================REGRESSION
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+# transform data
+original_column_names = X_train.columns.tolist()
+# Transform data
+X_train_F = scaler.fit_transform(X_train)
+
+# # Create a new DataFrame for X_train_F with original column names
+X_train_F = pd.DataFrame(X_train_F, columns=original_column_names, index=y_train.index)
+
+#Plot the original data, training data, and test data
+plt.figure(figsize=(10, 6))
+plt.plot(y_train.index, y_train, label='Training Data')
+plt.plot(y_test.index, y_test, label='Test Data', color='orange')
+plt.plot(y_test.index, predictions, label='Holt-Winters Forecast', linestyle='--', color='green')
+plt.xlabel('Date')
+plt.ylabel('Wave Height')
+plt.title('Holt-Winters Forecast')
+plt.legend()
+plt.show()
+
+#=====================VIF
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+def it_VIF(df):
+    thresh=5
+    output=pd.DataFrame()
+    k=df.shape[1]
+    vif=[variance_inflation_factor(df.values,i) for i in range(df.shape[1])]
+    for i in range(1,k):
+        print(f"Iteration {i}:")
+        print(vif)
+        a=np.argmax(vif)
+        print(f"MAX VIF IS FEATURE:{a}")
+        if(vif[a] <=thresh):
+            break
+        if (i==1):
+            output=df.drop(df.columns[a], axis=1)
+            vif=[variance_inflation_factor(output.values, j) for j in range(output.shape[1])]
+        elif i>1:
+            output = output.drop(output.columns[a], axis=1)
+            vif = [variance_inflation_factor(output.values, j) for j in range(output.shape[1])]
+    return (output)
+features=it_VIF(X_train_F)
+print(f"Chosen Features:",features.columns)
+print("No Colinearity Issues, VIF reccomends keeping all features")
+#================= Backwards Regression
+import statsmodels.api as sm
+X_train_F=sm.add_constant(X_train_F)
+X_train_F1=X_train_F.copy(deep=True)
+bswr1 = sm.OLS(y_train, X_train_F1).fit()
+print(bswr1.summary())
+X_train_F1.drop(['SST'], axis=1, inplace=True)
+bswr2 = sm.OLS(y_train,X_train_F1 ).fit()
+#print(bswr2.summary())
+X_train_F1.drop(['Peak Direction'], axis=1, inplace=True)
+bswr3 = sm.OLS(y_train,X_train_F1 ).fit()
+print(bswr3.summary())
+
+
+##================ACF of residuals
+X_test_reduced=sm.add_constant(X_test)
+X_test_reduced=X_test_reduced[['const','Hs','Tz', 'Tp']]
+yt_pred= bswr3.predict(X_train_F1)
+y_pred = bswr3.predict(X_test_reduced)
+predictions=pd.concat([yt_pred,y_pred],axis=1)
+PE=[]
+y_pred=pd.DataFrame(y_pred)
+Y_test=pd.DataFrame(y_test, index=y_test.index)
+y_pred=y_pred[0].values.tolist()
+
+Y_test=Y_test['Hmax'].values.tolist()
+for i in range(len(y_pred)):
+     P=y_pred[i]
+     A=Y_test[i]
+     PE.append(A-P)
+
+plt.figure()
+plt.scatter(y,predictions[0])
+plt.title('Actual vs Predicted Value Plot')
+plt.xlabel('Actual Value')
+plt.ylabel('Predicted Value')
+t= np.linspace(0, 6,10000 )
+c=t
+plt. plot(t,c,c= 'g')
+plt.tight_layout()
+plt.show()
+#ACF of Residuals
+ACF_stem(PE,48, "Predicted vs Error ACF")
+print("Variance of Residuals:", np.var(PE))
+print("Mean of Residuals:", np.mean(PE))
+
+#===FTEST:
+A = np.identity(len(bswr3.params))
+A = A[1:,:]
+print("FTEST",bswr3.f_test(A))
+
+
+plt.figure(figsize=(30, 10))
+plt.plot(y_train.index, y_train, label='Train Data')
+plt.plot(y_test.index,y_test, label='Actual Test Data')
+plt.plot(y_test.index,y_pred, label='Predicted Test Data')
+
+plt.title('Regression Predicitons')
+plt.legend()
+plt.xlabel('Date')
+plt.ylabel('Max Wave Height')
+plt.grid(True)
+plt.tight_layout()
+plt.show()
