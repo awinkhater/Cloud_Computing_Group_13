@@ -240,10 +240,9 @@ def pearson_corr(x, y):
 sns.set()
 
 
-# In[21]:
-
 
 #Plot 9
+plt.figure()
 sns.scatterplot(data = df, x = "SST", y = "Hs", s=10)
 plt.xlabel("Temperature (°C)")
 plt.ylabel("Wave Height (m)")
@@ -254,6 +253,7 @@ plt.show()
 
 
 #Plot 10
+plt.figure()
 ax = plt.axes(projection="polar")
 ax.set_theta_direction(-1)
 ax.set_theta_zero_location("N")
@@ -267,6 +267,7 @@ plt.show()
 
 
 #Plot 11
+plt.figure()
 sns.scatterplot(data = df, x="Tp", y="Hmax", s=10)
 plt.xlabel("Period (s)")
 plt.xlim(df.Tp.min()-1, df.Tp.max()+1)
@@ -278,6 +279,7 @@ plt.show()
 
 
 #Plot 12
+plt.figure()
 sns.scatterplot(data = df, x=df.Tz, y=df.Hmax, s=10)
 plt.xlabel("Period (s)")
 plt.xlim(df.Tp.min()-1, df.Tp.max()+1)
